@@ -15,7 +15,7 @@ interface IWithdrawVerifier {
     function verify(
         bytes calldata proof,
         bytes32 virtualMerkleRoot,
-        bytes32 nullifier,
+        bytes32 nullifierHash,
         address recipient
     ) external view returns (bool);
 }
@@ -30,7 +30,7 @@ contract TornadoOptV1 {
     /// @notice Checkpoint validity set
     mapping(bytes32 => bool) public validCheckpoint;
 
-    /// @notice Nullifier set for double-withdraw prevention
+    /// @notice Nullifier hash set for double-withdraw prevention
     mapping(bytes32 => bool) public nullified;
 
     /// @notice Fixed denomination for ETH pool
@@ -46,7 +46,7 @@ contract TornadoOptV1 {
     // ========= Events =========
     event Deposit(bytes32 indexed commitment, uint256 index);
     event Checkpoint(bytes32 indexed hashChainRoot, bytes32 indexed virtualMerkleRoot);
-    event Withdraw(bytes32 indexed nullifier, address indexed to);
+    event Withdraw(bytes32 indexed nullifierHash, address indexed to);
 
     // ========= Custom Errors (gas-efficient) =========
     error InvalidCommitment();
@@ -118,26 +118,26 @@ contract TornadoOptV1 {
 
     /// @notice Withdraw against a registered checkpoint state.
     /// @param proof_W ZK proof attesting inclusion and nullifier correctness against Ri
-    /// @param nullifier Nullifier derived from the secret to prevent double-withdraw
+    /// @param nullifierHash Hash of the nullifier secret used to prevent double-withdraw
     /// @param virtualMerkleRoot Registered checkpoint state commitment
     /// @param recipient Payout address
     function withdraw(
         bytes calldata proof_W,
-        bytes32 nullifier,
+        bytes32 nullifierHash,
         bytes32 virtualMerkleRoot,
         address payable recipient
     ) external nonReentrant {
         if (!validCheckpoint[virtualMerkleRoot]) revert UnknownCheckpoint();
-        if (nullified[nullifier]) revert NullifierUsed();
+        if (nullified[nullifierHash]) revert NullifierUsed();
 
-        bool ok = withdrawVerifier.verify(proof_W, virtualMerkleRoot, nullifier, recipient);
+        bool ok = withdrawVerifier.verify(proof_W, virtualMerkleRoot, nullifierHash, recipient);
         if (!ok) revert InvalidProof();
 
-        nullified[nullifier] = true;
+        nullified[nullifierHash] = true;
 
         (bool sent, ) = recipient.call{value: denomination}("");
         require(sent, "TRANSFER_FAIL");
 
-        emit Withdraw(nullifier, recipient);
+        emit Withdraw(nullifierHash, recipient);
     }
 }
