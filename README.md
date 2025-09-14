@@ -1,6 +1,6 @@
 ## TornadoOpt V1 (Quick Guide)
 
-Privacy pool with off-chain Merkle updates, on-chain checkpoints for Virtual Merkle Root by Folding Scheme(ZK), and Groth16 withdrawals.
+Very Cheap Privacy pool with off-chain Merkle Tree updates by Folding Scheme + Groth16 Decider, on-chain checkpoint for Registering the Merkle Root, and Groth16 withdrawals.
 
 ### 1) Setup
 - Install Foundry: https://book.getfoundry.sh/
