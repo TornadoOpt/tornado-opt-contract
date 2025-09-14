@@ -19,6 +19,7 @@ contract IVCVerifierAdapter is NovaDecider {
         returns (bool)
     {
         // Silence unused warnings; NovaDecider proof must bind these in its public inputs
+        // TODO: extract these from the proof
         hashChainRoot;
         virtualMerkleRoot;
 
