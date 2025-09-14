@@ -1,3 +1,6 @@
 [submodule "lib/tornado-opt-withdraw"]
 	path = lib/tornado-opt-withdraw
 	url = https://github.com/TornadoOpt/tornado-opt-withdraw
+[submodule "lib/forge-std"]
+	path = lib/forge-std
+	url = https://github.com/foundry-rs/forge-std
