@@ -11,7 +11,7 @@ interface IIVCVerifier {
 
 /// @notice Interface for the withdraw verifier
 interface IWithdrawVerifier {
-    function verify(bytes calldata proof, bytes32 virtualMerkleRoot, bytes32 nullifierHash, address recipient)
+    function verify(bytes calldata proof, bytes32 virtualMerkleRoot, bytes32 nullifierHash, bytes32 recipientF)
         external
         view
         returns (bool);
@@ -137,21 +137,22 @@ contract TornadoOptV1 {
     /// @param proof_W ZK proof attesting inclusion and nullifier correctness against Ri
     /// @param nullifierHash Hash of the nullifier secret used to prevent double-withdraw
     /// @param virtualMerkleRoot Registered checkpoint state commitment
-    /// @param recipient Payout address
+    /// @param recipientF Recipient as field element; low 160 bits = payout address
     function withdraw(
         bytes calldata proof_W,
         bytes32 nullifierHash,
         bytes32 virtualMerkleRoot,
-        address payable recipient
+        bytes32 recipientF
     ) external nonReentrant {
         if (!validCheckpoint[virtualMerkleRoot]) revert UnknownCheckpoint();
         if (nullified[nullifierHash]) revert NullifierUsed();
 
-        bool ok = withdrawVerifier.verify(proof_W, virtualMerkleRoot, nullifierHash, recipient);
+        bool ok = withdrawVerifier.verify(proof_W, virtualMerkleRoot, nullifierHash, recipientF);
         if (!ok) revert InvalidProof();
 
         nullified[nullifierHash] = true;
 
+        address payable recipient = payable(address(uint160(uint256(recipientF))));
         (bool sent,) = recipient.call{value: denomination}("");
         require(sent, "TRANSFER_FAIL");
 

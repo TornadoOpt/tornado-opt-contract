@@ -14,7 +14,7 @@ contract WithdrawVerifierAdapter is Verifier {
     /// @param virtualMerkleRoot State commitment registered via checkpoint
     /// @param nullifierHash Hash of the nullifier secret to prevent double-withdraw
     /// @param recipient Payout address (lower 160 bits of field element)
-    function verify(bytes calldata proof, bytes32 virtualMerkleRoot, bytes32 nullifierHash, address recipient)
+    function verify(bytes calldata proof, bytes32 virtualMerkleRoot, bytes32 nullifierHash, bytes32 recipient)
         external
         view
         returns (bool)
@@ -32,7 +32,7 @@ contract WithdrawVerifierAdapter is Verifier {
         uint256[3] memory input;
         input[0] = uint256(virtualMerkleRoot);
         input[1] = uint256(nullifierHash);
-        input[2] = uint256(uint160(recipient));
+        input[2] = uint256(recipient);
 
         return verifyTx(p, input);
     }

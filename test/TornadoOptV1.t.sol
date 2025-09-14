@@ -31,7 +31,7 @@ contract MockWithdrawVerifier {
         ok = _ok;
     }
 
-    function verify(bytes calldata, bytes32, bytes32, address) external view returns (bool) {
+    function verify(bytes calldata, bytes32, bytes32, bytes32) external view returns (bool) {
         return ok;
     }
 }
