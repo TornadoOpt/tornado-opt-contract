@@ -90,11 +90,37 @@ contract TornadoOptV1 {
         uint256 index = nextIndex;
         unchecked { nextIndex = index + 1; }
 
-        // Domain-separated running hash: sha256(0x01 || old || commitment)
-        // Using sha256 to align with circuit/canonical hash for the chain.
-        hashChainRoot = sha256(abi.encodePacked(bytes1(0x01), hashChainRoot, commitment));
+        // Hash chain per circuit spec:
+        // preimage = LE(hashChainRoot) || LE(commitment)
+        // digest   = sha256(preimage)
+        // newRoot  = Fr.from_le_bytes_mod_order(digest[0..30])  // first 31 bytes as little-endian
+        // Note: Using 31 bytes ensures the value < 2^248 << r (BN254), so mod reduction is a no-op.
+        bytes memory preimage = new bytes(64);
+        _writeLE32(preimage, 0, hashChainRoot);
+        _writeLE32(preimage, 32, commitment);
+
+        bytes32 d = sha256(preimage);
+        hashChainRoot = _le31ToBytes32(d);
 
         emit Deposit(commitment, index);
+    }
+
+    // ======== Internal helpers for LE encoding/decoding ========
+    function _writeLE32(bytes memory dst, uint256 offset, bytes32 x) internal pure {
+        uint256 v = uint256(x);
+        for (uint256 i = 0; i < 32; i++) {
+            dst[offset + i] = bytes1(uint8(v >> (8 * i)));
+        }
+    }
+
+    function _le31ToBytes32(bytes32 digest) internal pure returns (bytes32 out) {
+        // Interpret first 31 bytes of digest as little-endian uint, return as bytes32 (big-endian word)
+        bytes memory db = abi.encodePacked(digest);
+        uint256 acc;
+        for (uint256 i = 0; i < 31; i++) {
+            acc |= uint256(uint8(db[i])) << (8 * i);
+        }
+        out = bytes32(acc);
     }
 
     /// @notice Register a new checkpoint proven by IVC, committing virtualMerkleRoot.
