@@ -6,16 +6,34 @@ import {TornadoOptV1} from "../src/TornadoOptV1.sol";
 
 contract MockIVCVerifier {
     bool public ok;
-    constructor(bool _ok) { ok = _ok; }
-    function set(bool _ok) external { ok = _ok; }
-    function verify(bytes calldata, bytes32, bytes32) external view returns (bool) { return ok; }
+
+    constructor(bool _ok) {
+        ok = _ok;
+    }
+
+    function set(bool _ok) external {
+        ok = _ok;
+    }
+
+    function verify(bytes calldata, bytes32, bytes32) external view returns (bool) {
+        return ok;
+    }
 }
 
 contract MockWithdrawVerifier {
     bool public ok;
-    constructor(bool _ok) { ok = _ok; }
-    function set(bool _ok) external { ok = _ok; }
-    function verify(bytes calldata, bytes32, bytes32, address) external view returns (bool) { return ok; }
+
+    constructor(bool _ok) {
+        ok = _ok;
+    }
+
+    function set(bool _ok) external {
+        ok = _ok;
+    }
+
+    function verify(bytes calldata, bytes32, bytes32, address) external view returns (bool) {
+        return ok;
+    }
 }
 
 contract TornadoOptV1Test is Test {
@@ -43,4 +61,3 @@ contract TornadoOptV1Test is Test {
         assertEq(pool.nextIndex(), 1);
     }
 }
-

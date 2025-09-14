@@ -7,7 +7,10 @@ import {WithdrawVerifierAdapter} from "../src/verifiers/WithdrawVerifierAdapter.
 import {IVCVerifierAdapter} from "../src/verifiers/IVCVerifierAdapter.sol";
 
 contract TornadoOptV1Script is Script {
-    function run() public returns (TornadoOptV1 pool, WithdrawVerifierAdapter withdrawVerifier, IVCVerifierAdapter ivcVerifier) {
+    function run()
+        public
+        returns (TornadoOptV1 pool, WithdrawVerifierAdapter withdrawVerifier, IVCVerifierAdapter ivcVerifier)
+    {
         // Required params via environment
         uint256 pk = vm.envUint("PRIVATE_KEY");
         uint256 denomination = vm.envUint("DENOMINATION_WEI");

@@ -3,21 +3,18 @@ pragma solidity ^0.8.20;
 
 /// @notice Interface for the IVC verifier
 interface IIVCVerifier {
-    function verify(
-        bytes calldata proof,
-        bytes32 hashChainRoot,
-        bytes32 virtualMerkleRoot
-    ) external view returns (bool);
+    function verify(bytes calldata proof, bytes32 hashChainRoot, bytes32 virtualMerkleRoot)
+        external
+        view
+        returns (bool);
 }
 
 /// @notice Interface for the withdraw verifier
 interface IWithdrawVerifier {
-    function verify(
-        bytes calldata proof,
-        bytes32 virtualMerkleRoot,
-        bytes32 nullifierHash,
-        address recipient
-    ) external view returns (bool);
+    function verify(bytes calldata proof, bytes32 virtualMerkleRoot, bytes32 nullifierHash, address recipient)
+        external
+        view
+        returns (bool);
 }
 
 /// @title TornadoOptV1
@@ -68,11 +65,7 @@ contract TornadoOptV1 {
         _status = _NOT_ENTERED;
     }
 
-    constructor(
-        uint256 _denomination,
-        address _ivcVerifier,
-        address _withdrawVerifier
-    ) {
+    constructor(uint256 _denomination, address _ivcVerifier, address _withdrawVerifier) {
         require(_ivcVerifier != address(0) && _withdrawVerifier != address(0), "BAD_VERIFIER");
         denomination = _denomination;
         ivcVerifier = IIVCVerifier(_ivcVerifier);
@@ -88,7 +81,9 @@ contract TornadoOptV1 {
         if (msg.value != denomination) revert InvalidValue();
 
         uint256 index = nextIndex;
-        unchecked { nextIndex = index + 1; }
+        unchecked {
+            nextIndex = index + 1;
+        }
 
         // Hash chain per circuit spec:
         // preimage = LE(hashChainRoot) || LE(commitment)
@@ -127,11 +122,7 @@ contract TornadoOptV1 {
     /// @param proofIVC Aggregated IVC/SNARK proof
     /// @param hashChainRoot_ Expected current hashChainRoot
     /// @param virtualMerkleRoot One-word state commitment (e.g., Poseidon2(tag, merkleRoot', index'))
-    function setCheckpoint(
-        bytes calldata proofIVC,
-        bytes32 hashChainRoot_,
-        bytes32 virtualMerkleRoot
-    ) external {
+    function setCheckpoint(bytes calldata proofIVC, bytes32 hashChainRoot_, bytes32 virtualMerkleRoot) external {
         if (hashChainRoot != hashChainRoot_) revert StaleOld();
 
         bool ok = ivcVerifier.verify(proofIVC, hashChainRoot, virtualMerkleRoot);
@@ -161,7 +152,7 @@ contract TornadoOptV1 {
 
         nullified[nullifierHash] = true;
 
-        (bool sent, ) = recipient.call{value: denomination}("");
+        (bool sent,) = recipient.call{value: denomination}("");
         require(sent, "TRANSFER_FAIL");
 
         emit Withdraw(nullifierHash, recipient);

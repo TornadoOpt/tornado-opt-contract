@@ -13,13 +13,14 @@ contract IVCVerifierAdapter is NovaDecider {
     /// @param proof ABI-encoded calldata for NovaDecider's `verifyNovaProof` (with selector)
     /// @param hashChainRoot Current running hash (provided for ABI compatibility; bound inside proof)
     /// @param virtualMerkleRoot Committed state (provided for ABI compatibility; bound inside proof)
-    function verify(
-        bytes calldata proof,
-        bytes32 hashChainRoot,
-        bytes32 virtualMerkleRoot
-    ) external view returns (bool) {
+    function verify(bytes calldata proof, bytes32 hashChainRoot, bytes32 virtualMerkleRoot)
+        external
+        view
+        returns (bool)
+    {
         // Silence unused warnings; NovaDecider proof must bind these in its public inputs
-        hashChainRoot; virtualMerkleRoot;
+        hashChainRoot;
+        virtualMerkleRoot;
 
         // Forward the calldata to this contract (NovaDecider) for verification
         (bool ok, bytes memory ret) = address(this).staticcall(proof);
@@ -30,4 +31,3 @@ contract IVCVerifierAdapter is NovaDecider {
         return false;
     }
 }
-

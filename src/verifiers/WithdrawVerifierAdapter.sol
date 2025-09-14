@@ -14,12 +14,11 @@ contract WithdrawVerifierAdapter is Verifier {
     /// @param virtualMerkleRoot State commitment registered via checkpoint
     /// @param nullifierHash Hash of the nullifier secret to prevent double-withdraw
     /// @param recipient Payout address (lower 160 bits of field element)
-    function verify(
-        bytes calldata proof,
-        bytes32 virtualMerkleRoot,
-        bytes32 nullifierHash,
-        address recipient
-    ) external view returns (bool) {
+    function verify(bytes calldata proof, bytes32 virtualMerkleRoot, bytes32 nullifierHash, address recipient)
+        external
+        view
+        returns (bool)
+    {
         // Decode Groth16 proof
         require(proof.length == 32 * 8, "BAD_PROOF_LEN");
         uint256[8] memory w = abi.decode(proof, (uint256[8]));
@@ -30,7 +29,7 @@ contract WithdrawVerifierAdapter is Verifier {
         p.c = Pairing.G1Point(w[6], w[7]);
 
         // Map public inputs: [vmRoot, nullifierHash, recipient]
-        uint[3] memory input;
+        uint256[3] memory input;
         input[0] = uint256(virtualMerkleRoot);
         input[1] = uint256(nullifierHash);
         input[2] = uint256(uint160(recipient));
@@ -38,4 +37,3 @@ contract WithdrawVerifierAdapter is Verifier {
         return verifyTx(p, input);
     }
 }
-
